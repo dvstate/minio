@@ -697,6 +697,8 @@ func getBucketAccessPolicy(objAPI ObjectLayer, bucketName string) (policy.Bucket
 		policyInfo, err = layer.GetBucketPolicies(bucketName)
 	case *gcsGateway:
 		policyInfo, err = layer.GetBucketPolicies(bucketName)
+	case *siaObjects:
+		policyInfo, err = layer.GetBucketPolicies(bucketName)
 	default:
 		policyInfo, err = readBucketAccessPolicy(objAPI, bucketName)
 	}
@@ -1026,6 +1028,7 @@ func toWebAPIError(err error) APIError {
 			Description:    err.Error(),
 		}
 	}
+
 	// Convert error type to api error code.
 	switch err.(type) {
 	case StorageFull:
@@ -1060,6 +1063,7 @@ func toWebAPIError(err error) APIError {
 		}
 	}
 
+
 	// Log unexpected and unhandled errors.
 	errorIf(err, errUnexpected.Error())
 	return APIError{
@@ -1067,6 +1071,7 @@ func toWebAPIError(err error) APIError {
 		HTTPStatusCode: http.StatusInternalServerError,
 		Description:    err.Error(),
 	}
+
 }
 
 // writeWebErrorResponse - set HTTP status code and write error description to the body.
