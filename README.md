@@ -1,115 +1,78 @@
-# Minio Quickstart Guide [![Slack](https://slack.minio.io/slack?type=svg)](https://slack.minio.io) [![Go Report Card](https://goreportcard.com/badge/minio/minio)](https://goreportcard.com/report/minio/minio) [![Docker Pulls](https://img.shields.io/docker/pulls/minio/minio.svg?maxAge=604800)](https://hub.docker.com/r/minio/minio/) [![codecov](https://codecov.io/gh/minio/minio/branch/master/graph/badge.svg)](https://codecov.io/gh/minio/minio)
+# Minio with Sia Gateway
+This project is a fork of the official Minio project located [here](http://github.com/minio/minio). This project provides a version of Minio that supports using Sia for backend storage.
 
+### What is Minio?
 Minio is an object storage server released under Apache License v2.0. It is compatible with Amazon S3 cloud storage service. It is best suited for storing unstructured data such as photos, videos, log files, backups and container / VM images. Size of an object can range from a few KBs to a maximum of 5TB.
 
-Minio server is light enough to be bundled with the application stack, similar to NodeJS, Redis and MySQL.
+### What is Sia?
+Sia is a blockchain-based decentralized storage service with built-in privacy and redundancy that costs up to 10x LESS than Amazon S3 and most other cloud providers! See [sia.tech](https://sia.tech) to learn how awesome Sia truly is.
 
-## Docker Container
-### Stable
-```
-docker pull minio/minio
-docker run -p 9000:9000 minio/minio server /export
-```
+### Getting Started
+Since the Sia integration is not yet officially supported by Minio, no official binaries or packages are currently available for download. However, installing from source is a very simple process.
 
-### Edge
-```
-docker pull minio/minio:edge
-docker run -p 9000:9000 minio/minio:edge server /export
-```
-Please visit Minio Docker quickstart guide for more [here](https://docs.minio.io/docs/minio-docker-quickstart-guide)
+#### Install Go
+Building Minio requires that you have the Go programming language installed. [Download and install it from here](https://golang.org/dl/).
 
-## macOS
-### Homebrew
-Install minio packages using [Homebrew](http://brew.sh/)
-
-```sh
-brew install minio/stable/minio
-minio server ~/Photos
+#### Clone this Project
+You'll want to clone this project into your system's $GOROOT/src/github.com/minio directory. For example:
 ```
-#### Note
-If you previously installed minio using `brew install minio` then reinstall minio from `minio/stable/minio` official repo. Homebrew builds are unstable due to golang 1.8 bugs.
-
-```
-brew uninstall minio 
-brew install minio/stable/minio
-```  
-
-### Binary Download
-| Platform| Architecture | URL|
-| ----------| -------- | ------|
-|Apple macOS|64-bit Intel|https://dl.minio.io/server/minio/release/darwin-amd64/minio |
-```sh
-chmod 755 minio
-./minio server ~/Photos
+mkdir /Users/david/go/src/github.com/minio
+cd /Users/david/go/src/github.com/minio
+git clone http://github.com/dvstate/minio
 ```
 
-## GNU/Linux
-### Binary Download
-| Platform| Architecture | URL|
-| ----------| -------- | ------|
-|GNU/Linux|64-bit Intel|https://dl.minio.io/server/minio/release/linux-amd64/minio |
-|         |32-bit Intel|https://dl.minio.io/server/minio/release/linux-386/minio |
-|         |32-bit ARM|https://dl.minio.io/server/minio/release/linux-arm/minio |
-|         |64-bit ARM|https://dl.minio.io/server/minio/release/linux-arm64/minio |
-|         |32-bit ARMv6|https://dl.minio.io/server/minio/release/linux-arm6vl/minio |
-```sh
-chmod +x minio
-./minio server ~/Photos
+#### Build the Minio Server
+Then you'll need to build the Minio server executable, which is a simple process thanks to the Makefile provided by Minio. For example:
 ```
-
-## Microsoft Windows
-### Binary Download
-| Platform| Architecture | URL|
-| ----------| -------- | ------|
-|Microsoft Windows|64-bit|https://dl.minio.io/server/minio/release/windows-amd64/minio.exe |
-|                 |32-bit|https://dl.minio.io/server/minio/release/windows-386/minio.exe |
-```sh
-minio.exe server D:\Photos
+cd /Users/david/go/src/github.com/minio/minio
+make
 ```
+After the build process completes, an executable named 'minio' will appear in the same directory. This is the executable you will launch to run the Minio server.
 
-## FreeBSD
-### Port
-Install minio packages using [pkg](https://github.com/freebsd/pkg)
+#### Install Sia Daemon
+To use Sia for backend storage, Minio will need access to a running Sia daemon that is:
+1. fully synchronized with the Sia network,
+2. has sufficient rental contract allowances, and
+3. has an unlocked wallet.
 
-```sh
-pkg install minio
-sysrc minio_enable=yes
-sysrc minio_disks=/home/user/Photos
-service minio start
+To download and install Sia for your platform, visit [sia.tech](http://sia.tech).
+
+To purchase inexpensive rental contracts with Sia, you have to possess some Siacoin in your wallet. To obtain Siacoin, you will need to purchase some on an exchange such as Bittrex using bitcoin. To obtain bitcoin, you'll need to use a service such as Coinbase to buy bitcoin using a bank account or credit card. If you need help, there are many friendly people active on [Sia's Slack](http://slackin.sia.tech).
+
+#### Configuration
+Once you have the Sia Daemon running and synchronized, with rental allowances created, you just need to configure the Minio server to use Sia. Configuration is accomplished using environment variables, and is only necessary if the default values need to be changed. On a linux machine using bash shell, you can easily set environment variables by adding export statements to the "~/.bash_profile" file. For example:
 ```
-
-### Binary Download
-| Platform| Architecture | URL|
-| ----------| -------- | ------|
-|FreeBSD|64-bit|https://dl.minio.io/server/minio/release/freebsd-amd64/minio |
-```sh
-chmod 755 minio
-./minio server ~/Photos
+export MY_ENV_VAR=VALUE
 ```
+Just remember to reload the profile by executing: "source ~/.bash_profile" on the command prompt.
 
-## Install from Source
+##### Supported Environment Variables
+Environment Variable | Description | Default Value
+--- | --- | ---
+`SIA_MANAGER_DELAY_SEC` | The number of seconds to delay between cache/db management operations. | 30
+`SIA_UPLOAD_CHECK_FREQ_MS` | The number of milliseconds to wait between checks with Sia network to determine if file has completed uploading. | 3000
+`SIA_CACHE_MAX_SIZE_BYTES` | The maximum allowed size of the cache directory in bytes. | 10000000000 (10GB)
+`SIA_CACHE_PURGE_AFTER_SEC` | The maximum number of seconds since the time a file was last downloaded before removing that file from the cache. | 86400 (24 hours)
+`SIA_DAEMON_ADDR` | The address and port of your Sia Daemon instance. | 127.0.0.1:9980
+`SIA_CACHE_DIR` | The name of the Sia cache directory. | .sia_cache
+`SIA_DB_FILE` | The name of the Sia cache database file. | .sia.db
+`SIA_DEBUG` | A flag for enabling debug messages to be printed to the screen. Useful for developers only. 0=Off, 1=On | 0
 
-Source installation is only intended for developers and advanced users. If you do not have a working Golang environment, please follow [How to install Golang](https://docs.minio.io/docs/how-to-install-golang).
+Most of the default options should work, but they are made available to meet a wide variety of potential needs. If the default values will work for your configuration, no environment variables will need to be set.
 
-```sh
-go get -u github.com/minio/minio
+#### Running Minio with Sia Gateway
+To launch Minio server with the Sia gateway, simply execute the following at the command prompt:
 ```
+./minio gateway sia
+```
+It should print to the screen a list of access information. To connect to the server and upload files using your web browser, open a web browser and point it to the address displayed for "Browser Access." Then log in using the "AccessKey" and "SecretKey" that are also displayed on-screen. You should then be able to create buckets (folders) and upload files.
 
-## Test using Minio Browser
-Minio Server comes with an embedded web based object browser. Point your web browser to http://127.0.0.1:9000 ensure your server has started successfully.
+You can also interact with the server using Minio's "mc" command line tool. Instructions for using it are also displayed after starting the server.
 
-![Screenshot](https://github.com/minio/minio/blob/master/docs/screenshots/minio-browser.jpg?raw=true)
+#### About the Sia Cache
+Each time a file is uploaded or downloaded using Minio, the files are passing through a cache layer that sits between the Minio interface and the Sia network. The cache provides many benefits such as drastically lowering the latency experienced with frequently requested files, reducing download fees on the Sia network, etc. Below is a list of things you should know about how the cache operates.
+1. When you upload a file through Minio, once Minio confirms the file is uploaded, the file is guaranteed to be "Available" on the Sia network. It may not yet have multiple redundancy, but it is available to be downloaded from Sia if needed. A copy of the uploaded file will exist in the cache directory until either SIA_CACHE_PURGE_AFTER_SEC seconds have elapsed since that file was last downloaded, or until the cache directory runs out of space, as specified by SIA_CACHE_MAX_SIZE_BYTES.
+2. When you request a file for download from Minio, if the file exists in the cache, it is served immediately from the cache. If the file does not exist in the cache, it will first be downloaded from the Sia network to the cache directory and then served from the cache.
 
-## Test using Minio Client `mc`
-`mc` provides a modern alternative to UNIX commands like ls, cat, cp, mirror, diff etc. It supports filesystems and Amazon S3 compatible cloud storage services. Follow the Minio Client [Quickstart Guide](https://docs.minio.io/docs/minio-client-quickstart-guide) for further instructions.
-
-## Explore Further
-- [Minio Erasure Code QuickStart Guide](https://docs.minio.io/docs/minio-erasure-code-quickstart-guide)
-- [Use `mc` with Minio Server](https://docs.minio.io/docs/minio-client-quickstart-guide)
-- [Use `aws-cli` with Minio Server](https://docs.minio.io/docs/aws-cli-with-minio)
-- [Use `s3cmd` with Minio Server](https://docs.minio.io/docs/s3cmd-with-minio)
-- [Use `minio-go` SDK with Minio Server](https://docs.minio.io/docs/golang-client-quickstart-guide)
-- [The Minio documentation website](https://docs.minio.io)
-
-## Contribute to Minio Project
-Please follow Minio [Contributor's Guide](https://github.com/minio/minio/blob/master/CONTRIBUTING.md)
+### Questions?
+If you need help, there are many friendly people active on [Sia's Slack](http://slackin.sia.tech).
