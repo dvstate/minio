@@ -34,12 +34,13 @@ To use Sia for backend storage, Minio will need access to a running Sia daemon t
 1. fully synchronized with the Sia network,
 2. has sufficient rental contract allowances, and
 3. has an unlocked wallet.
+
 To download and install Sia for your platform, visit [sia.tech](http://sia.tech).
 
 To purchase inexpensive rental contracts with Sia, you have to possess some Siacoin in your wallet. To obtain Siacoin, you will need to purchase some on an exchange such as Bittrex using bitcoin. To obtain bitcoin, you'll need to use a service such as Coinbase to buy bitcoin using a bank account or credit card. If you need help, there are many friendly people active on [Sia's Slack](http://slackin.sia.tech).
 
 #### Configuration
-Once you have the Sia Daemon running and synchronized, with rental allowances created, you just need to configure the Minio server to use Sia. Configuration is accomplished using environment variables. On a linux machine using bash shell, you can easily set environment variables by adding export statements to the "~/.bash_profile" file. For example:
+Once you have the Sia Daemon running and synchronized, with rental allowances created, you just need to configure the Minio server to use Sia. Configuration is accomplished using environment variables, and is only necessary if the default values need to be changed. On a linux machine using bash shell, you can easily set environment variables by adding export statements to the "~/.bash_profile" file. For example:
 ```
 export MY_ENV_VAR=VALUE
 ```
@@ -57,7 +58,7 @@ Environment Variable | Description | Default Value
 `SIA_DB_FILE` | The name of the Sia cache database file. | .sia.db
 `SIA_DEBUG` | A flag for enabling debug messages to be printed to the screen. Useful for developers only. 0=Off, 1=On | 0
 
-Most of the default options should work, but they are made available to meet a wide variety of potential needs.
+Most of the default options should work, but they are made available to meet a wide variety of potential needs. If the default values will work for your configuration, no environment variables will need to be set.
 
 #### Running Minio with Sia Gateway
 To launch Minio server with the Sia gateway, simply execute the following at the command prompt:
