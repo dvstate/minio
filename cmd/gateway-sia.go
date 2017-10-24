@@ -115,14 +115,14 @@ func non2xx(code int) bool {
 // only be called if the response's status code is non-2xx. The error returned
 // may not be of type api.Error in the event of an error unmarshalling the
 // JSON.
-func decodeError(resp *http.Response) error {
+func decodeError(method, url string, resp *http.Response) error {
 	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
 	}
 	var apiErr api.Error
 	if err = json.Unmarshal(data, &apiErr); err != nil {
-		return fmt.Errorf("Could not decode error: %s (response was '%s')", err.Error(), string(data))
+		return fmt.Errorf("Could not decode error from %s %s: %s (response was '%s')", method, url, err.Error(), string(data))
 	}
 	return apiErr
 }
@@ -143,7 +143,7 @@ func apiGet(addr, call, apiPassword string) (*http.Response, error) {
 		return nil, errors.New("API call not recognized: " + call)
 	}
 	if non2xx(resp.StatusCode) {
-		err := decodeError(resp)
+		err := decodeError("GET", "http://"+addr+call, resp)
 		resp.Body.Close()
 		return nil, err
 	}
@@ -169,7 +169,7 @@ func apiPost(addr, call, vals, apiPassword string) (*http.Response, error) {
 	}
 
 	if non2xx(resp.StatusCode) {
-		err := decodeError(resp)
+		err := decodeError("POST", "http://"+addr+call, resp)
 		resp.Body.Close()
 		return nil, err
 	}
