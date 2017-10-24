@@ -18,7 +18,6 @@ package cmd
 
 import (
 	"encoding/json"
-	"path/filepath"
 	"errors"
 	"fmt"
 	"io"
@@ -26,6 +25,7 @@ import (
 	"net/http"
 	"net/url"
 	"os"
+	"path/filepath"
 	"regexp"
 	"strings"
 	"time"
@@ -37,7 +37,7 @@ import (
 type siaObjects struct {
 	gatewayUnsupported
 	Address  string // Address and port of Sia Daemon.
-	TempDir string // Temporary storage location for file transfers.
+	TempDir  string // Temporary storage location for file transfers.
 	RootDir  string // Root directory to store files on Sia.
 	password string // Sia password for uploading content in authenticated manner.
 }
@@ -217,9 +217,9 @@ func get(addr, call, apiPassword string) error {
 func newSiaGateway() (GatewayLayer, error) {
 	sia := &siaObjects{
 		Address:  os.Getenv("SIA_DAEMON_ADDR"),
-		TempDir: os.Getenv("SIA_TEMP_DIR"),
+		TempDir:  os.Getenv("SIA_TEMP_DIR"),
 		RootDir:  os.Getenv("SIA_ROOT_DIR"),
-		password: os.Getenv("MINIO_SECRET_KEY"),
+		password: os.Getenv("SIA_API_PASSWORD"),
 	}
 
 	// If Address not provided on command line or ENV, default to:
@@ -342,7 +342,7 @@ func (s *siaObjects) GetObject(bucket string, object string, startOffset int64, 
 		return traceError(ObjectNameInvalid{bucket, object})
 	}
 
-	dstFile, err := filepath.Abs( pathJoin(s.TempDir, mustGetUUID()) )
+	dstFile, err := filepath.Abs(pathJoin(s.TempDir, mustGetUUID()))
 	if err != nil {
 		return err
 	}
@@ -445,7 +445,7 @@ func (s *siaObjects) PutObject(bucket string, object string, data *HashReader, m
 	buf := make([]byte, int(bufSize))
 
 	var srcFile string
-	if srcFile, err = filepath.Abs( pathJoin(s.TempDir, mustGetUUID()) ); err != nil {
+	if srcFile, err = filepath.Abs(pathJoin(s.TempDir, mustGetUUID())); err != nil {
 		return objInfo, err
 	}
 	defer fsRemoveFile(srcFile)
