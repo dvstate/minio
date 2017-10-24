@@ -132,7 +132,7 @@ func apiGet(addr, call, apiPassword string) (*http.Response, error) {
 	}
 	resp, err := api.HttpGETAuthenticated("http://"+addr+call, apiPassword)
 	if err != nil {
-		return nil, errors.New("no response from daemon")
+		return nil, errors.New("Error response from daemon: " + err.Error())
 	}
 	if resp.StatusCode == http.StatusNotFound {
 		resp.Body.Close()
@@ -156,7 +156,7 @@ func apiPost(addr, call, vals, apiPassword string) (*http.Response, error) {
 
 	resp, err := api.HttpPOSTAuthenticated("http://"+addr+call, vals, apiPassword)
 	if err != nil {
-		return nil, errors.New("no response from daemon")
+		return nil, errors.New("Error response from daemon: " + err.Error())
 	}
 
 	if resp.StatusCode == http.StatusNotFound {
