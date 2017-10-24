@@ -76,3 +76,11 @@ Each time a file is uploaded or downloaded using Minio, the files are passing th
 
 ### Questions?
 If you need help, there are many friendly people active on [Sia's Slack](http://slackin.sia.tech).
+
+### Donations
+Everything in this repository is free for all purposes. However, a few people have asked how to donate to support this project. Below are addresses for Bitcoin and Siacoin.
+
+Siacoin donation address: 11562030101e02afa9b1a323752f4db7259545cb9c5d6f965583abbd5165e45e5a1c60f82646
+Bitcoin donation address: 1A7RpeCQNyNU4HRZiAeKXAbsj6ywzDQwhT
+
+Thank you!
