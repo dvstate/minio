@@ -21,6 +21,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/ioutil"
 	"net"
 	"net/http"
 	"net/url"
@@ -115,10 +116,13 @@ func non2xx(code int) bool {
 // may not be of type api.Error in the event of an error unmarshalling the
 // JSON.
 func decodeError(resp *http.Response) error {
-	var apiErr api.Error
-	err := json.NewDecoder(resp.Body).Decode(&apiErr)
+	data, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return err
+	}
+	var apiErr api.Error
+	if err = json.Unmarshal(data, &apiErr); err != nil {
+		return fmt.Errorf("Could not decode error: %s (response was '%s')", err.Error(), string(data))
 	}
 	return apiErr
 }
