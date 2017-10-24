@@ -353,7 +353,7 @@ func (s *siaObjects) GetObject(bucket string, object string, startOffset int64, 
 	}
 	defer fsRemoveFile(dstFile)
 
-	var siaObj = pathJoin(s.RootDir, bucket, object)
+	var siaObj = strings.TrimLeft(pathJoin(s.RootDir, bucket, object), "/")
 	if err = get(s.Address, "/renter/download/"+siaObj+"?destination="+url.QueryEscape(dstFile), s.password); err != nil {
 		return err
 	}
@@ -463,7 +463,7 @@ func (s *siaObjects) PutObject(bucket string, object string, data *hash.Reader, 
 		return objInfo, err
 	}
 
-	var siaObj = pathJoin(s.RootDir, bucket, object)
+	var siaObj = strings.TrimLeft(pathJoin(s.RootDir, bucket, object), "/")
 	if err = post(s.Address, "/renter/upload/"+siaObj, "source="+srcFile, s.password); err != nil {
 		return objInfo, err
 	}
@@ -477,7 +477,7 @@ func (s *siaObjects) PutObject(bucket string, object string, data *hash.Reader, 
 // DeleteObject deletes a blob in bucket
 func (s *siaObjects) DeleteObject(bucket string, object string) error {
 	// Tell Sia daemon to delete the object
-	var siaObj = pathJoin(s.RootDir, bucket, object)
+	var siaObj = strings.TrimLeft(pathJoin(s.RootDir, bucket, object), "/")
 	return post(s.Address, "/renter/delete/"+siaObj, "", s.password)
 }
 
