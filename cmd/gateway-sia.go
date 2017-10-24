@@ -32,6 +32,7 @@ import (
 
 	"github.com/NebulousLabs/Sia/api"
 	"github.com/minio/minio-go/pkg/set"
+	"github.com/minio/minio/pkg/hash"
 )
 
 type siaObjects struct {
@@ -432,7 +433,7 @@ func (s *siaObjects) waitTillSiaUploadCompletes(bucket string, object string) *S
 }
 
 // PutObject creates a new object with the incoming data,
-func (s *siaObjects) PutObject(bucket string, object string, data *HashReader, metadata map[string]string) (objInfo ObjectInfo, err error) {
+func (s *siaObjects) PutObject(bucket string, object string, data *hash.Reader, metadata map[string]string) (objInfo ObjectInfo, err error) {
 	// Check the object's name first
 	if !s.isValidObjectName(object) {
 		return objInfo, siaToObjectError(siaErrorInvalidObjectName, bucket, object)

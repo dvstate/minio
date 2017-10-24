@@ -41,7 +41,7 @@ func (s *siaObjects) CopyObjectPart(srcBucket string, srcObject string, destBuck
 }
 
 // PutObjectPart puts a part of object in bucket
-func (s *siaObjects) PutObjectPart(bucket string, object string, uploadID string, partID int, data *HashReader) (pi PartInfo, err error) {
+func (s *siaObjects) PutObjectPart(bucket string, object string, uploadID string, partID int, data *hash.Reader) (pi PartInfo, err error) {
 	return pi, traceError(NotImplemented{})
 }
 
