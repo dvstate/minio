@@ -29,12 +29,11 @@ type ErasureCoder interface {
 	// containing parity data.
 	Encode(data []byte) ([][]byte, error)
 
-	// Recover recovers the original data from pieces (including parity) and
-	// writes it to w. pieces should be identical to the slice returned by
-	// Encode (length and order must be preserved), but with missing elements
-	// set to nil. n is the number of bytes to be written to w; this is
-	// necessary because pieces may have been padded with zeros during
-	// encoding.
+	// Recover recovers the original data from pieces and writes it to w.
+	// pieces should be identical to the slice returned by Encode (length and
+	// order must be preserved), but with missing elements set to nil. n is
+	// the number of bytes to be written to w; this is necessary because
+	// pieces may have been padded with zeros during encoding.
 	Recover(pieces [][]byte, n uint64, w io.Writer) error
 }
 
@@ -62,6 +61,7 @@ type DownloadInfo struct {
 type DownloadWriter interface {
 	WriteAt(b []byte, off int64) (int, error)
 	Destination() string
+	Close() error
 }
 
 // FileUploadParams contains the information used by the Renter to upload a
@@ -75,6 +75,7 @@ type FileUploadParams struct {
 // FileInfo provides information about a file.
 type FileInfo struct {
 	SiaPath        string            `json:"siapath"`
+	LocalPath      string            `json:"localpath"`
 	Filesize       uint64            `json:"filesize"`
 	Available      bool              `json:"available"`
 	Renewing       bool              `json:"renewing"`
@@ -221,6 +222,22 @@ type RenterContract struct {
 	StorageSpending  types.Currency `json:"storagespending"`
 	UploadSpending   types.Currency `json:"uploadspending"`
 
+	// TotalCost indicates the amount of money that the renter spent and/or
+	// locked up while forming a contract. This includes fees, and includes
+	// funds which were allocated (but not necessarily committed) to spend on
+	// uploads/downloads/storage.
+	//
+	// ContractFee is the amount of money paid to the host to cover potential
+	// future transaction fees that the host may incur, and to cover any other
+	// overheads the host may have.
+	//
+	// TxnFee is the amount of money spent on the transaction fee when putting
+	// the renter contract on the blockchain.
+	//
+	// SiafundFee is the amount of money spent on siafund fees when creating the
+	// contract. The siafund fee that the renter pays covers both the renter and
+	// the host portions of the contract, and therefore can be unexpectedly high
+	// if the the host collateral is high.
 	TotalCost   types.Currency `json:"totalcost"`
 	ContractFee types.Currency `json:"contractfee"`
 	TxnFee      types.Currency `json:"txnfee"`
@@ -231,6 +248,23 @@ type RenterContract struct {
 	// should be renewed.
 	GoodForRenew  bool
 	GoodForUpload bool
+
+	// PreviousContracts contains the list of contracts which were previously
+	// rewned **for the same billing cylce**. This is not a full history of the
+	// contract line, but only a history within the billing cycle. The primary
+	// purpose of keeping these contracts is to be able to easily find a full
+	// spending breakdown within a billing cycle.
+	PreviousContracts []RenterContract
+}
+
+// ContractorSpending contains the metrics about how much the Contractor has
+// spent during the current billing period.
+type ContractorSpending struct {
+	ContractSpending types.Currency `json:"contractspending"`
+	DownloadSpending types.Currency `json:"downloadspending"`
+	StorageSpending  types.Currency `json:"storagespending"`
+	UploadSpending   types.Currency `json:"uploadspending"`
+	Unspent          types.Currency `json:"unspent"`
 }
 
 // EndHeight returns the height at which the host is no longer obligated to
@@ -268,6 +302,10 @@ type Renter interface {
 	// CurrentPeriod returns the height at which the current allowance period
 	// began.
 	CurrentPeriod() types.BlockHeight
+
+	// PeriodSpending returns the amount spent on contracts in the current
+	// billing period.
+	PeriodSpending() ContractorSpending
 
 	// DeleteFile deletes a file entry from the renter.
 	DeleteFile(path string) error

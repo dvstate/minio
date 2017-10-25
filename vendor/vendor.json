@@ -81,76 +81,82 @@
 			"revisionTime": "2017-09-13T22:19:17Z"
 		},
 		{
-			"checksumSHA1": "6uV5aKsgFYjrbDiNczM7GB2mU94=",
+			"checksumSHA1": "933uegaFIylm9DnuDK0EDHpw28o=",
 			"path": "github.com/NebulousLabs/Sia/api",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
+		},
+		{
+			"checksumSHA1": "wJ8GuJLvoDrd0RWkAehJNs2XH2g=",
+			"path": "github.com/NebulousLabs/Sia/build",
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
 			"checksumSHA1": "zpZ4pHoRIA/tbYAwa6jDgJS4prc=",
 			"path": "github.com/NebulousLabs/Sia/crypto",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "VcMOvbRYfNwkXE5pCd6q4oyUtXA=",
+			"checksumSHA1": "JJcm2Oq6XjMdnJuij8xW476ZXeM=",
 			"path": "github.com/NebulousLabs/Sia/encoding",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "cUJlcV9jFEvFXCX4NcfpOVfP0Y4=",
+			"checksumSHA1": "mo5EeLw9+FidsNBln2RpOMfkQ08=",
 			"path": "github.com/NebulousLabs/Sia/modules",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "R1AVrCmA6u268btyZMe7vI+E25Y=",
+			"checksumSHA1": "3oqdnpPh+CpHN8Q1O+5hFRSdAJQ=",
 			"path": "github.com/NebulousLabs/Sia/modules/renter",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "cZAchdFqvFljDTmBiyfqQAhkSDs=",
+			"checksumSHA1": "OUYQU5eRHZ5Dri7sSjgvKNQi4bQ=",
 			"path": "github.com/NebulousLabs/Sia/modules/renter/contractor",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "297F4rCjmTcAaVCKZssMW5PNqWk=",
+			"checksumSHA1": "I7P2jTOnZqfTi9OHnD9kKu/We/Q=",
 			"path": "github.com/NebulousLabs/Sia/modules/renter/hostdb",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "cYzHd/vXhJj5ZFbamEngPyvPiYU=",
+			"checksumSHA1": "ToccC8HOYgqDi2XKO4VZa/8Z8WY=",
 			"path": "github.com/NebulousLabs/Sia/modules/renter/hostdb/hosttree",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "Prc8G4jR0WiZcnmgYbL3udJTa9w=",
+			"checksumSHA1": "vypIia2/wqr/Bfq5dlotXBq0re8=",
 			"path": "github.com/NebulousLabs/Sia/modules/renter/proto",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "q9qaKKwMX6MF205C6S2T7WhwobY=",
+			"checksumSHA1": "75215TvD+Ih1AFxSNaJlk7bBy5I=",
 			"path": "github.com/NebulousLabs/Sia/persist",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "lyOzCweTAZFozKJ1VrsO93DIMbM=",
+			"checksumSHA1": "L4pzQJxSDIPwn9lrkeJ3Yw8p9sI=",
 			"path": "github.com/NebulousLabs/Sia/sync",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
-			"checksumSHA1": "ZBpck5E1bbIy0rnYywCLwercvEY=",
+			"checksumSHA1": "GghSBCRoTEONK4t5VuCO2Vkxaoo=",
 			"path": "github.com/NebulousLabs/Sia/types",
-			"revision": "141f7b2717f46d8080dd55d3a0cafdcb1931d2f7",
-			"revisionTime": "2017-08-31T03:48:44Z"
+			"revision": "5b247eeda95209d3618e01619c273d193931e949",
+			"revisionTime": "2017-10-24T20:51:22Z"
 		},
 		{
 			"checksumSHA1": "565HJanNKXq45ouz6Yu1DXToLM0=",

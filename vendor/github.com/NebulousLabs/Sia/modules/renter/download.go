@@ -25,9 +25,9 @@ const (
 )
 
 var (
-	errPrevErr            = errors.New("download could not be completed due to a previous error")
 	errInsufficientHosts  = errors.New("insufficient hosts to recover file")
 	errInsufficientPieces = errors.New("couldn't fetch enough pieces to recover data")
+	errPrevErr            = errors.New("download could not be completed due to a previous error")
 
 	// maxActiveDownloadPieces determines the maximum number of pieces that are
 	// allowed to be concurrently downloading. More pieces means more
@@ -122,7 +122,7 @@ type (
 	}
 )
 
-// newSectionDownload initialises and returns a download object for the specified chunk.
+// newSectionDownload initializes and returns a download object for the specified chunk.
 func (r *Renter) newSectionDownload(f *file, destination modules.DownloadWriter, offset, length uint64) *download {
 	d := newDownload(f, destination)
 
@@ -165,7 +165,7 @@ func newDownload(f *file, destination modules.DownloadWriter) *download {
 	}
 }
 
-// initPieceSet initialises the piece set, including calculations of the total download size.
+// initPieceSet initializes the piece set, including calculations of the total download size.
 func (d *download) initPieceSet(f *file, r *Renter) {
 	// Allocate the piece size and progress bar so that the download will
 	// finish at exactly 100%. Due to rounding error and padding, there is not
@@ -217,6 +217,8 @@ func (d *download) fail(err error) {
 	d.downloadComplete = true
 	d.downloadErr = err
 	close(d.downloadFinished)
+	// TODO: log the error from Close().
+	d.destination.Close()
 }
 
 // recoverChunk takes a chunk that has had a sufficient number of pieces
@@ -286,6 +288,9 @@ func (cd *chunkDownload) recoverChunk() error {
 		diff := chunkTopAddress - (cd.download.length + cd.download.offset)
 		upperBound -= diff + 1
 	}
+	if upperBound > uint64(len(result)) {
+		upperBound = uint64(len(result))
+	}
 
 	result = result[lowerBound:upperBound]
 
@@ -317,6 +322,10 @@ func (cd *chunkDownload) recoverChunk() error {
 		// Signal that the download is complete.
 		cd.download.downloadComplete = true
 		close(cd.download.downloadFinished)
+		err = cd.download.destination.Close()
+		if err != nil {
+			return err
+		}
 	}
 	return nil
 }
@@ -377,19 +386,18 @@ func (r *Renter) managedDownloadIteration(ds *downloadState) {
 	}
 
 	// Update the set of workers to include everyone in the worker pool.
-	contracts := r.hostContractor.Contracts()
+	r.managedUpdateWorkerPool()
 	id := r.mu.Lock()
-	r.updateWorkerPool(contracts)
 	ds.availableWorkers = make([]*worker, 0, len(r.workerPool))
 	for _, worker := range r.workerPool {
 		// Ignore workers that are already in the active set of workers.
-		_, exists := ds.activeWorkers[worker.contractID]
+		_, exists := ds.activeWorkers[worker.contract.ID]
 		if exists {
 			continue
 		}
 
 		// Ignore workers that have a download failure recently.
-		if time.Since(worker.recentDownloadFailure) < downloadFailureCooldown {
+		if time.Since(worker.downloadRecentFailure) < downloadFailureCooldown {
 			continue
 		}
 
@@ -413,7 +421,7 @@ func (r *Renter) managedDownloadIteration(ds *downloadState) {
 
 // managedScheduleIncompleteChunks iterates through all of the incomplete
 // chunks and finds workers to complete the chunks.
-// managedScheduleIncompleteChunks also checks wheter a chunk is unable to be
+// managedScheduleIncompleteChunks also checks whether a chunk is unable to be
 // completed.
 func (r *Renter) managedScheduleIncompleteChunks(ds *downloadState) {
 	var newIncompleteChunks []*chunkDownload
@@ -438,7 +446,7 @@ loop:
 		// Try to find a worker that is able to pick up the slack on the
 		// incomplete download from the set of available workers.
 		for i, worker := range ds.availableWorkers {
-			scheduled, exists := incompleteChunk.workerAttempts[worker.contractID]
+			scheduled, exists := incompleteChunk.workerAttempts[worker.contract.ID]
 			if scheduled || !exists {
 				// Either this worker does not contain a piece of this chunk,
 				// or this worker has already been scheduled to download a
@@ -446,7 +454,7 @@ loop:
 				continue
 			}
 
-			piece, exists := incompleteChunk.download.pieceSet[incompleteChunk.index][worker.contractID]
+			piece, exists := incompleteChunk.download.pieceSet[incompleteChunk.index][worker.contract.ID]
 			if !exists {
 				continue
 			}
@@ -457,9 +465,9 @@ loop:
 				chunkDownload: incompleteChunk,
 				resultChan:    ds.resultChan,
 			}
-			incompleteChunk.workerAttempts[worker.contractID] = true
+			incompleteChunk.workerAttempts[worker.contract.ID] = true
 			ds.availableWorkers = append(ds.availableWorkers[:i], ds.availableWorkers[i+1:]...)
-			ds.activeWorkers[worker.contractID] = struct{}{}
+			ds.activeWorkers[worker.contract.ID] = struct{}{}
 			select {
 			case worker.priorityDownloadChan <- dw:
 			default:
@@ -582,7 +590,7 @@ func (r *Renter) managedWaitOnDownloadWork(ds *downloadState) {
 	cd := finishedDownload.chunkDownload
 	if finishedDownload.err != nil {
 		r.log.Debugln("Error when downloading a piece:", finishedDownload.err)
-		worker.recentDownloadFailure = time.Now()
+		worker.downloadRecentFailure = time.Now()
 		ds.incompleteChunks = append(ds.incompleteChunks, cd)
 		return
 	}
@@ -675,21 +683,33 @@ func (dw *DownloadBufferWriter) Bytes() []byte {
 	return dw.data
 }
 
+// Close() implements DownloadWriter's Close method.
+func (dw *DownloadBufferWriter) Close() error {
+	return nil
+}
+
 // DownloadFileWriter is a file-backed implementation of DownloadWriter.
 type DownloadFileWriter struct {
 	f        *os.File
 	location string
 	offset   uint64
+	written  uint64
+	length   uint64
 }
 
 // NewDownloadFileWriter creates a new instance of a DownloadWriter backed by the file named.
-func NewDownloadFileWriter(fname string, offset, length uint64) *DownloadFileWriter {
-	l, _ := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY, defaultFilePerm)
+func NewDownloadFileWriter(fname string, offset, length uint64) (*DownloadFileWriter, error) {
+	l, err := os.OpenFile(fname, os.O_CREATE|os.O_WRONLY, defaultFilePerm)
+	if err != nil {
+		return nil, err
+	}
 	return &DownloadFileWriter{
 		f:        l,
 		location: fname,
 		offset:   offset,
-	}
+		written:  0,
+		length:   length,
+	}, nil
 }
 
 // Destination implements the Location method of the DownloadWriter interface
@@ -700,7 +720,21 @@ func (dw *DownloadFileWriter) Destination() string {
 
 // WriteAt writes the passed bytes at the specified offset.
 func (dw *DownloadFileWriter) WriteAt(b []byte, off int64) (int, error) {
-	return dw.f.WriteAt(b, off-int64(dw.offset))
+	if dw.written+uint64(len(b)) > dw.length {
+		build.Critical("DownloadFileWriter write exceeds file length")
+	}
+	n, err := dw.f.WriteAt(b, off-int64(dw.offset))
+	if err != nil {
+		return n, err
+	}
+	dw.written += uint64(n)
+	return n, err
+}
+
+// Close implements DownloadWriter's Close method and releases the file opened
+// by the DownloadFileWriter.
+func (dw *DownloadFileWriter) Close() error {
+	return dw.f.Close()
 }
 
 // DownloadHttpWriter is a http response writer-backed implementation of
@@ -728,11 +762,16 @@ func NewDownloadHttpWriter(w io.Writer, offset, length uint64) *DownloadHttpWrit
 	}
 }
 
-// Destination implements the Location method of the DownloadWriter
+// Destination implements the Destination method of the DownloadWriter
 // interface and informs callers where this download writer is
 // being written to.
 func (dw *DownloadHttpWriter) Destination() string {
 	return "httpresp"
+}
+
+// Cloes implements DownloadWriter's Close method.
+func (dw *DownloadHttpWriter) Close() error {
+	return nil
 }
 
 // WriteAt buffers parts of the file until the entire file can be
